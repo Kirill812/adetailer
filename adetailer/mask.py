@@ -23,6 +23,7 @@ class MergeInvert(IntEnum):
     NONE = 0
     MERGE = 1
     MERGE_INVERT = 2
+    SUBTRACT = 3
 
 
 def _dilate(arr: np.ndarray, value: int) -> np.ndarray:
@@ -224,6 +225,34 @@ def filter_k_largest(pred: PredictOutput, k: int = 0) -> PredictOutput:
     pred.masks = [pred.masks[i] for i in idx]
     return pred
 
+# Substract Mask
+def subtract_masks(mask1: Image.Image, mask2: Image.Image) -> Image.Image:
+    """
+    Subtracts mask2 from mask1 and returns the resulting mask.
+
+    Parameters
+    ----------
+    mask1 : Image.Image
+        The mask from which mask2 will be subtracted.
+    mask2 : Image.Image
+        The mask to subtract from mask1.
+
+    Returns
+    -------
+    Image.Image
+        The resulting mask after the subtraction.
+    """
+    # Convert masks to numpy arrays
+    arr1 = np.array(mask1)
+    arr2 = np.array(mask2)
+    
+    # Subtract mask2 from mask1
+    subtracted_arr = np.clip(arr1 - arr2, 0, 255)
+    
+    # Convert the result back to an image
+    subtracted_mask = Image.fromarray(subtracted_arr)
+    return subtracted_mask
+
 
 # Merge / Invert
 def mask_merge(masks: list[Image.Image]) -> list[Image.Image]:
@@ -251,5 +280,10 @@ def mask_merge_invert(
     if mode == MergeInvert.MERGE_INVERT:
         merged = mask_merge(masks)
         return mask_invert(merged)
+
+    if mode == MergeInvert.SUBTRACT:  
+        if len(masks) != 2:
+            return masks
+        return [subtract_masks(masks[0], masks[1])]
 
     raise RuntimeError

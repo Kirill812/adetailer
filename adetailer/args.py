@@ -235,4 +235,4 @@ BBOX_SORTBY = [
     "Position (center to edge)",
     "Area (large to small)",
 ]
-MASK_MERGE_INVERT = ["None", "Merge", "Merge and Invert"]
+MASK_MERGE_INVERT = ["None", "Merge", "Merge and Invert", "Subtract"]
